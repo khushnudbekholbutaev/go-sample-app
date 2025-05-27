@@ -36,7 +36,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "./go-sample-app/docker-compose.yml"
-          target: "/opt/go-sample-app/"
+          target: "/opt"
 
       - uses: appleboy/ssh-action@v1
         with:
