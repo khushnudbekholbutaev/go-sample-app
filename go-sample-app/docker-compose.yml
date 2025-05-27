@@ -2,9 +2,8 @@ services:
   web:
     image: registry.digitalocean.com/image-register/go-sample-app:b486188d2b2747843037ef8584c497dc7317493d
     restart: unless-stopped
-    expose:
-      - "5000"
-
+    ports:
+      - "8080"
   nginx:
     image: nginx:1.28.0-alpine3.21
     restart: unless-stopped
@@ -12,3 +11,5 @@ services:
       - "80:80"
     depends_on:
       - web
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
