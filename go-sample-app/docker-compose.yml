@@ -1,6 +1,6 @@
 services:
   web:
-    image: go-sample-app
+    image: registry.digitalocean.com/image-register/go-sample-app:b486188d2b2747843037ef8584c497dc7317493d
     restart: unless-stopped
     expose:
       - "5000"
