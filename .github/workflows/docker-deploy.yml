@@ -1,0 +1,54 @@
+name: Build and Deploy to VM
+
+#on:
+#  push:
+#    branches:
+#      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      image_name: registry.digitalocean.com/image-register/go-sample-app:${{ github.sha }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and Push Docker Image
+        run: |
+          echo "${{ secrets.REGISTRY_TOKEN }}" | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+          docker build -t registry.digitalocean.com/image-register/go-sample-app:${{ github.sha }} .
+          docker push registry.digitalocean.com/image-register/go-sample-app:${{ github.sha }}
+
+  deploy:
+    name: Deploy to VM
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "./docker-compose.yml"
+          target: "/opt/go-sample-app/"
+
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /opt/go-sample-app
+
+            echo "${{ secrets.REGISTRY_TOKEN }}" | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+            yq -i -y '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yml
+
+            docker compose up -d --remove-orphans
