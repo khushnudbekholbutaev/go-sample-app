@@ -10,13 +10,15 @@ import (
 func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/image/", imageHandler)
+	
+	// Health endpointni ham main ichida ro'yxatdan o'tkazamiz
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
+
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
-
-http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("ok"))
-})
 
 var indexTemplate = template.Must(template.ParseFiles("index.tmpl"))
 
