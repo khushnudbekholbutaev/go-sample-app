@@ -3,18 +3,31 @@ package main
 import (
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/joho/godotenv"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
 var db *sql.DB
 
 func main() {
-	// PostgreSQL'ga ulanish
-	dsn := "host=10.10.10.3 port=5432 user=app_user password=app_password dbname=app_db sslmode=disable"
-	var err error
+	// .env faylni yuklash
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// DSN stringini .env dan o'qib tuzish
+	dsn := "host=" + os.Getenv("DB_HOST") +
+		" port=" + os.Getenv("DB_PORT") +
+		" user=" + os.Getenv("DB_USER") +
+		" password=" + os.Getenv("DB_PASSWORD") +
+		" dbname=" + os.Getenv("DB_NAME") +
+		" sslmode=disable"
+
 	db, err = sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalf("Database ulanishi muvaffaqiyatsiz: %v", err)
@@ -28,7 +41,6 @@ func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/image/", imageHandler)
 
-	// Health check
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
