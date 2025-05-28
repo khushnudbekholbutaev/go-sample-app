@@ -46,9 +46,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd /opt/go-sample-app
-
             echo "${{ secrets.REGISTRY_TOKEN }}" | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-
-            yq -i -y '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yml
-
+            export IMAGE_NAME="${{ needs.build.outputs.image_name }}"
+            yq -i -y ".services.web.image = \"${IMAGE_NAME}\"" docker-compose.yml
             docker compose up -d --remove-orphans
