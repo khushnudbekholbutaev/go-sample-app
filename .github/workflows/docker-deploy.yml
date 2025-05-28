@@ -44,21 +44,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            set -e
             cd /opt/go-sample-app
-          
-            echo "🔐 Docker registry login..."
             echo "${{ secrets.REGISTRY_TOKEN }}" | docker login registry.digitalocean.com -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
-          
-            echo "🧪 Checking current image..."
-            cat docker-compose.yml | grep image
-          
-            echo "🔄 Updating docker-compose image name..."
-            which yq || echo "❌ yq not found!"
-            yq -i -y '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yml
-          
-            echo "📄 New docker-compose.yml:"
-            cat docker-compose.yml
-          
-            echo "🚀 Running docker compose up..."
+            yq -i '.services.web.image = "${{ needs.build.outputs.image_name }}"' docker-compose.yml
             docker compose up -d --remove-orphans
+            docker compose exec nginx nginx -s reload
