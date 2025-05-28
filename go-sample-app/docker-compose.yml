@@ -4,6 +4,8 @@ services:
     expose:
       - 8080
     restart: unless-stopped
+    env_file:
+      - .env
     networks:
       - my-network
 
