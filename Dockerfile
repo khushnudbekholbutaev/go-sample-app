@@ -8,6 +8,7 @@ RUN go mod download
 COPY go-sample-app/ ./go-sample-app/
 
 WORKDIR /app/go-sample-app
+
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
 FROM alpine:3.21
