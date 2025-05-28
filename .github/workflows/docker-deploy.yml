@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      image_name: registry.digitalocean.com/image-register/go-sample-app:${{ github.sha }})
+      image_name: registry.digitalocean.com/image-register/go-sample-app:${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
