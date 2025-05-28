@@ -1,22 +1,39 @@
 package main
 
 import (
+	"database/sql"
+	_ "github.com/lib/pq"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
 )
 
+var db *sql.DB
+
 func main() {
+	// PostgreSQL'ga ulanish
+	dsn := "host=10.10.10.3 port=5432 user=app_user password=app_password dbname=app_db sslmode=disable"
+	var err error
+	db, err = sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatalf("Database ulanishi muvaffaqiyatsiz: %v", err)
+	}
+	defer db.Close()
+
+	if err = db.Ping(); err != nil {
+		log.Fatalf("PostgreSQL serverga ulana olmadi: %v", err)
+	}
+
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/image/", imageHandler)
-	
-	// Health endpointni ham main ichida ro'yxatdan o'tkazamiz
+
+	// Health check
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	})
-	
+
 	log.Println("Starting server on :8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
